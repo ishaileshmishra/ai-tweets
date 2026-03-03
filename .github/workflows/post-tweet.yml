@@ -7,25 +7,25 @@ jobs:
   tweet:
     runs-on: ubuntu-latest
     env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-      X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
-      X_CONSUMER_KEY: ${{ secrets.X_CONSUMER_KEY }}
-      X_CONSUMER_SECRET: ${{ secrets.X_CONSUMER_SECRET }}
-      X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
-      X_ACCESS_TOKEN_SECRET: ${{ secrets.X_ACCESS_TOKEN_SECRET }}
+      OPENAI_API_KEY: ${{ vars.OPENAI_API_KEY }}
+      X_BEARER_TOKEN: ${{ vars.X_BEARER_TOKEN }}
+      X_CONSUMER_KEY: ${{ vars.X_CONSUMER_KEY }}
+      X_CONSUMER_SECRET: ${{ vars.X_CONSUMER_SECRET }}
+      X_ACCESS_TOKEN: ${{ vars.X_ACCESS_TOKEN }}
+      X_ACCESS_TOKEN_SECRET: ${{ vars.X_ACCESS_TOKEN_SECRET }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
-      - name: Verify secrets
+      - name: Verify variables
         run: |
-          if [ -z "$OPENAI_API_KEY" ]; then echo "::error::OPENAI_API_KEY is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
-          if [ -z "$X_BEARER_TOKEN" ]; then echo "::error::X_BEARER_TOKEN is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
-          if [ -z "$X_CONSUMER_KEY" ]; then echo "::error::X_CONSUMER_KEY is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
-          if [ -z "$X_CONSUMER_SECRET" ]; then echo "::error::X_CONSUMER_SECRET is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
-          if [ -z "$X_ACCESS_TOKEN" ]; then echo "::error::X_ACCESS_TOKEN is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
-          if [ -z "$X_ACCESS_TOKEN_SECRET" ]; then echo "::error::X_ACCESS_TOKEN_SECRET is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
-          echo "All secrets are configured."
+          if [ -z "$OPENAI_API_KEY" ]; then echo "::error::OPENAI_API_KEY is not set. Add it at: Settings → Secrets and variables → Actions → Repository variables"; exit 1; fi
+          if [ -z "$X_BEARER_TOKEN" ]; then echo "::error::X_BEARER_TOKEN is not set. Add it at: Settings → Secrets and variables → Actions → Repository variables"; exit 1; fi
+          if [ -z "$X_CONSUMER_KEY" ]; then echo "::error::X_CONSUMER_KEY is not set. Add it at: Settings → Secrets and variables → Actions → Repository variables"; exit 1; fi
+          if [ -z "$X_CONSUMER_SECRET" ]; then echo "::error::X_CONSUMER_SECRET is not set. Add it at: Settings → Secrets and variables → Actions → Repository variables"; exit 1; fi
+          if [ -z "$X_ACCESS_TOKEN" ]; then echo "::error::X_ACCESS_TOKEN is not set. Add it at: Settings → Secrets and variables → Actions → Repository variables"; exit 1; fi
+          if [ -z "$X_ACCESS_TOKEN_SECRET" ]; then echo "::error::X_ACCESS_TOKEN_SECRET is not set. Add it at: Settings → Secrets and variables → Actions → Repository variables"; exit 1; fi
+          echo "All variables are configured."
       - run: python bot.py
