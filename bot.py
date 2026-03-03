@@ -5,7 +5,6 @@ Run daily via cron or GitHub Actions. Requires .env with keys.
 """
 
 import os
-import logging
 from datetime import datetime
 
 from openai import OpenAI
@@ -14,17 +13,6 @@ import tweepy
 
 # Load environment variables
 load_dotenv()
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('twitter_bot.log'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger(__name__)
 
 
 class TwitterBot:
@@ -86,20 +74,16 @@ class TwitterBot:
             tweet = response.choices[0].message.content.strip()
             if len(tweet) > 280:
                 tweet = tweet[:277] + "..."
-            logger.info(f"Generated tweet: {tweet}")
             return tweet
         except Exception as e:
-            logger.error(f"OpenAI error: {e}")
             raise
 
     def post_tweet(self, text: str) -> dict:
         """Post tweet and return response."""
         try:
             response = self.client.create_tweet(text=text)
-            logger.info(f"Tweet posted! ID: {response.data['id']}")
             return response.data
         except tweepy.TweepyException as e:
-            logger.error(f"Tweepy error: {e}")
             if "401" in str(e):  # Unauthorized, check keys/permissions
                 raise ValueError("X API auth failed. Verify keys and app permissions (Read+Write).")
             raise
@@ -110,9 +94,7 @@ def main():
         bot = TwitterBot()
         tweet_text = bot.generate_tweet()
         bot.post_tweet(tweet_text)
-        logger.info("Daily post completed successfully.")
     except Exception as e:
-        logger.error(f"Bot run failed: {e}")
         raise
 
 # main function to run the bot
