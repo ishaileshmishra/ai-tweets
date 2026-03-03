@@ -19,4 +19,13 @@ jobs:
         with:
           python-version: '3.12'
       - run: pip install -r requirements.txt
+      - name: Verify secrets
+        run: |
+          if [ -z "$OPENAI_API_KEY" ]; then echo "::error::OPENAI_API_KEY is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
+          if [ -z "$X_BEARER_TOKEN" ]; then echo "::error::X_BEARER_TOKEN is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
+          if [ -z "$X_CONSUMER_KEY" ]; then echo "::error::X_CONSUMER_KEY is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
+          if [ -z "$X_CONSUMER_SECRET" ]; then echo "::error::X_CONSUMER_SECRET is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
+          if [ -z "$X_ACCESS_TOKEN" ]; then echo "::error::X_ACCESS_TOKEN is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
+          if [ -z "$X_ACCESS_TOKEN_SECRET" ]; then echo "::error::X_ACCESS_TOKEN_SECRET is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
+          echo "All secrets are configured."
       - run: python bot.py
