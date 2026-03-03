@@ -115,6 +115,6 @@ def main():
         logger.error(f"Bot run failed: {e}")
         raise
 
-
+# main function to run the bot
 if __name__ == "__main__":
     main()
