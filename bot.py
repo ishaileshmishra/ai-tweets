@@ -1,6 +1,6 @@
 """
 Production-ready X (Twitter) auto-poster for AI/software engineering content.
-Generates tweets using OpenAI GPT, posts via Tweepy X API v2.
+Generates tweets using Google Gemini, posts via Tweepy X API v2.
 Run daily via cron or GitHub Actions. Requires .env with keys.
 """
 
@@ -10,7 +10,9 @@ import time
 import logging
 from datetime import datetime
 
-from openai import OpenAI, RateLimitError, APIStatusError
+from google import genai
+from google.genai import types
+from google.api_core.exceptions import ResourceExhausted, GoogleAPIError
 from dotenv import load_dotenv
 import tweepy
 
@@ -45,16 +47,17 @@ FALLBACK_TWEETS = [
     "The secret to productive AI pair-programming: treat the AI like a junior dev — guide it, review its work, iterate. What's your AI pairing workflow? #AI #DevProductivity",
 ]
 
+GEMINI_MODEL = "gemini-2.0-flash"
 MAX_RETRIES = 3
 RETRY_BASE_DELAY = 2
 
 
 class TwitterBot:
     def __init__(self):
-        self.openai_api_key = os.getenv('OPENAI_API_KEY')
-        if not self.openai_api_key:
-            raise ValueError("OPENAI_API_KEY not set in .env")
-        self.openai_client = OpenAI(api_key=self.openai_api_key)
+        gemini_api_key = os.getenv('GEMINI_API_KEY')
+        if not gemini_api_key:
+            raise ValueError("GEMINI_API_KEY not set in .env")
+        self.gemini_client = genai.Client(api_key=gemini_api_key)
 
         missing_keys = [k for k in [
             'X_BEARER_TOKEN', 'X_CONSUMER_KEY', 'X_CONSUMER_SECRET',
@@ -72,13 +75,6 @@ class TwitterBot:
             wait_on_rate_limit=True
         )
 
-    def _is_quota_exhausted(self, error: RateLimitError) -> bool:
-        body = getattr(error, 'body', None)
-        if isinstance(body, dict):
-            code = body.get('error', {}).get('code', '')
-            return code == 'insufficient_quota'
-        return 'insufficient_quota' in str(error)
-
     def generate_tweet(self) -> str:
         topic = TOPICS[datetime.now().weekday() % len(TOPICS)]
 
@@ -86,43 +82,38 @@ class TwitterBot:
             f"Generate one engaging X/Twitter post (max 280 chars) about: {topic}. "
             "Make it informative, add a practical tip or insight, use 1-2 hashtags like #AI #SoftwareEngineering. "
             "Conversational tone, end with a question to engage. "
-            "Do not exceed 280 characters."
+            "Do not exceed 280 characters. Return ONLY the tweet text, nothing else."
         )
 
         for attempt in range(1, MAX_RETRIES + 1):
             try:
                 logger.info("Generating tweet (attempt %d/%d) for topic: %s", attempt, MAX_RETRIES, topic)
-                response = self.openai_client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[{"role": "user", "content": prompt}],
-                    max_tokens=100,
-                    temperature=0.7
+                response = self.gemini_client.models.generate_content(
+                    model=GEMINI_MODEL,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        max_output_tokens=150,
+                        temperature=0.7,
+                    ),
                 )
-                tweet = response.choices[0].message.content.strip()
+                tweet = response.text.strip()
                 if len(tweet) > 280:
                     tweet = tweet[:277] + "..."
                 logger.info("Tweet generated: %s", tweet)
                 return tweet
 
-            except RateLimitError as e:
-                if self._is_quota_exhausted(e):
-                    logger.warning("OpenAI quota exhausted — falling back to pre-written tweet")
-                    return self._fallback_tweet()
+            except ResourceExhausted as e:
                 if attempt == MAX_RETRIES:
-                    logger.warning("Transient rate-limit persisted after %d retries — using fallback", MAX_RETRIES)
+                    logger.warning("Gemini rate-limit persisted after %d retries — using fallback", MAX_RETRIES)
                     return self._fallback_tweet()
                 delay = RETRY_BASE_DELAY ** attempt
-                logger.warning("Rate-limited by OpenAI, retrying in %ds...", delay)
+                logger.warning("Rate-limited by Gemini, retrying in %ds: %s", delay, e)
                 time.sleep(delay)
 
-            except APIStatusError as e:
-                logger.error("OpenAI API error (status %s): %s", e.status_code, e.message)
-                if e.status_code in (401, 403):
-                    raise ValueError(
-                        "OpenAI authentication failed. Verify your OPENAI_API_KEY is valid."
-                    ) from e
+            except GoogleAPIError as e:
+                logger.error("Gemini API error: %s", e)
                 if attempt == MAX_RETRIES:
-                    logger.warning("OpenAI API unavailable after %d retries — using fallback", MAX_RETRIES)
+                    logger.warning("Gemini API unavailable after %d retries — using fallback", MAX_RETRIES)
                     return self._fallback_tweet()
                 delay = RETRY_BASE_DELAY ** attempt
                 logger.warning("Retrying in %ds...", delay)

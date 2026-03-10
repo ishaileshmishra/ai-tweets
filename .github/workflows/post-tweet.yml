@@ -7,7 +7,7 @@ jobs:
   tweet:
     runs-on: ubuntu-latest
     env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
       X_CONSUMER_KEY: ${{ secrets.X_CONSUMER_KEY }}
       X_CONSUMER_SECRET: ${{ secrets.X_CONSUMER_SECRET }}
@@ -21,7 +21,7 @@ jobs:
       - run: pip install -r requirements.txt
       - name: Verify variables
         run: |
-          if [ -z "$OPENAI_API_KEY" ]; then echo "::error::OPENAI_API_KEY is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
+          if [ -z "$GEMINI_API_KEY" ]; then echo "::error::GEMINI_API_KEY is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
           if [ -z "$X_BEARER_TOKEN" ]; then echo "::error::X_BEARER_TOKEN is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
           if [ -z "$X_CONSUMER_KEY" ]; then echo "::error::X_CONSUMER_KEY is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
           if [ -z "$X_CONSUMER_SECRET" ]; then echo "::error::X_CONSUMER_SECRET is not set. Add it at: Settings → Secrets and variables → Actions → Repository secrets"; exit 1; fi
