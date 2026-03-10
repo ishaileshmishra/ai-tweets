@@ -1,3 +1,6 @@
-google-genai>=1.0.0
-tweepy>=4.14.0
-python-dotenv>=1.0.0
+# Pinned for reproducible CI builds.
+# Compatibility: Python 3.11.
+openai==1.54.4
+tweepy==4.14.0
+python-dotenv==1.0.1
+requests==2.32.3
