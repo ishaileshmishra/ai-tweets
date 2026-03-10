@@ -20,22 +20,26 @@ Production-ready X (Twitter) auto-poster for AI/software engineering content. Ge
 ### Local
 
 1. Clone the repo:
+
    ```bash
    git clone https://github.com/ishaileshmishra/ai-tweets.git
    cd ai-tweets
    ```
 
 2. Install dependencies:
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. Copy `.env.example` to `.env` and add your keys:
+
    ```bash
    cp .env.example .env
    ```
 
 4. Run manually:
+
    ```bash
    python bot.py
    ```
@@ -43,6 +47,7 @@ Production-ready X (Twitter) auto-poster for AI/software engineering content. Ge
 ### GitHub Actions (Recommended)
 
 1. Create repo `ishaileshmishra/ai-tweets` on GitHub, then push:
+
    ```bash
    git init
    git add .
@@ -51,8 +56,8 @@ Production-ready X (Twitter) auto-poster for AI/software engineering content. Ge
    git remote add origin https://github.com/ishaileshmishra/ai-tweets.git
    git push -u origin main
    ```
+
 2. Go to **Settings → Secrets and variables → Actions** and add these 6 repository secrets:
-   - `OPENAI_API_KEY`
    - `X_BEARER_TOKEN`
    - `X_CONSUMER_KEY`
    - `X_CONSUMER_SECRET`
@@ -73,13 +78,12 @@ For VPS or local scheduling:
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `OPENAI_API_KEY` | OpenAI API key |
-| `X_BEARER_TOKEN` | X API bearer token |
-| `X_CONSUMER_KEY` | X API consumer key |
-| `X_CONSUMER_SECRET` | X API consumer secret |
-| `X_ACCESS_TOKEN` | X API access token |
+| Variable                | Description               |
+| ----------------------- | ------------------------- |
+| `X_BEARER_TOKEN`        | X API bearer token        |
+| `X_CONSUMER_KEY`        | X API consumer key        |
+| `X_CONSUMER_SECRET`     | X API consumer secret     |
+| `X_ACCESS_TOKEN`        | X API access token        |
 | `X_ACCESS_TOKEN_SECRET` | X API access token secret |
 
 ## Troubleshooting

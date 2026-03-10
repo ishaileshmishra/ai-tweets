@@ -11,8 +11,8 @@ import logging
 from datetime import datetime
 
 from google import genai
-from google.genai import types
-from google.api_core.exceptions import ResourceExhausted, GoogleAPIError
+from google.genai import types  # pyright: ignore[reportMissingImports]
+from google.api_core.exceptions import ResourceExhausted, GoogleAPIError  # pyright: ignore[reportMissingImports]
 from dotenv import load_dotenv
 import tweepy
 
