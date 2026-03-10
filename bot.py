@@ -5,6 +5,7 @@ Run daily via cron or GitHub Actions. Requires .env with keys.
 """
 
 import os
+import logging
 from datetime import datetime
 
 from openai import OpenAI
@@ -13,6 +14,17 @@ import tweepy
 
 # Load environment variables
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('twitter_bot.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
 
 
 class TwitterBot:
@@ -65,6 +77,7 @@ class TwitterBot:
         """
 
         try:
+            logger.info(f"Generating tweet for topic: {topic}")
             response = self.openai_client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": prompt}],
@@ -74,29 +87,48 @@ class TwitterBot:
             tweet = response.choices[0].message.content.strip()
             if len(tweet) > 280:
                 tweet = tweet[:277] + "..."
+            logger.info(f"Tweet generated successfully: {tweet}")
             return tweet
         except Exception as e:
+            logger.error(f"Error generating tweet: {str(e)}", exc_info=True)
             raise
 
     def post_tweet(self, text: str) -> dict:
         """Post tweet and return response."""
         try:
+            logger.info(f"Posting tweet: {text}")
             response = self.client.create_tweet(text=text)
+            tweet_id = response.data['id']
+            logger.info(f"Tweet posted successfully! Tweet ID: {tweet_id}")
             return response.data
         except tweepy.TweepyException as e:
-            if "401" in str(e):  # Unauthorized, check keys/permissions
+            if "401" in str(e):
+                logger.error("X API auth failed. Verify keys and app permissions (Read+Write).")
                 raise ValueError("X API auth failed. Verify keys and app permissions (Read+Write).")
+            logger.error(f"Tweepy error: {str(e)}", exc_info=True)
             raise
 
 
 def main():
+    """Main function to generate and post a tweet."""
     try:
+        logger.info("Starting Twitter bot...")
         bot = TwitterBot()
+        logger.info("TwitterBot initialized successfully")
+        
         tweet_text = bot.generate_tweet()
-        bot.post_tweet(tweet_text)
+        logger.info(f"Generated tweet: {tweet_text}")
+        
+        response = bot.post_tweet(tweet_text)
+        logger.info(f"Tweet posted successfully! Response: {response}")
+        
+    except ValueError as e:
+        logger.error(f"Configuration error: {str(e)}")
+        exit(1)
     except Exception as e:
-        raise
+        logger.error(f"Unexpected error: {str(e)}", exc_info=True)
+        exit(1)
 
-# main function to run the bot
+
 if __name__ == "__main__":
     main()
