@@ -8,4 +8,4 @@ client = tweepy.Client(
     access_token_secret="dummy_ats"
 )
 
-print("Auth used:", client.session.auth)
+print("Client created successfully:", type(client).__name__)
